@@ -16,38 +16,53 @@ const Login = () => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  const handleLogin = async () => {
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault(); // Prevent page reload
+
     try {
       const res = await api.post('/auth/login', { email, password });
       localStorage.setItem('token', res.data.token);
-
       addToast('success', 'Login successful!');
     } catch (err: any) {
-      addToast('danger', err.message || 'Something went wrong');
+      addToast('danger', err.response?.data?.message || err.message || 'Something went wrong');
     }
   };
 
   return (
     <div className='container mt-4'>
       <h1>Login</h1>
-      <div className='mb-3'>
-        <label>Email</label>
-        <input type='email' className='form-control' value={email} onChange={(e) => setEmail(e.target.value)} />
-      </div>
-      <div className='mb-3'>
-        <label>Password</label>
-        <input
-          type='password'
-          className='form-control'
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-      </div>
-      <button className='btn btn-primary w-100' onClick={handleLogin}>
-        Login
-      </button>
+      <form onSubmit={handleLogin}>
+        <div className='mb-3'>
+          <label htmlFor='email' className='form-label'>Email</label>
+          <input
+            type='email'
+            id='email'
+            name='email'
+            className='form-control'
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div className='mb-3'>
+          <label htmlFor='password' className='form-label'>Password</label>
+          <input
+            type='password'
+            id='password'
+            name='password'
+            className='form-control'
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        <button type='submit' className='btn btn-primary w-100'>
+          Login
+        </button>
+      </form>
       <ToastContainer toasts={toasts} removeToast={removeToast} />
     </div>
   );
 };
+
 export default Login;
