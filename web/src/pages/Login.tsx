@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ToastContainer from '../components/ToastContainer';
 import api from '../services/api';
 
@@ -6,6 +7,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [toasts, setToasts] = useState<{ id: number; type?: 'success' | 'danger'; message: string }[]>([]);
+  const navigate = useNavigate();
 
   const addToast = (type: 'success' | 'danger', message: string) => {
     const id = Date.now();
@@ -17,12 +19,19 @@ const Login = () => {
   };
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault(); // Prevent page reload
+    e.preventDefault();
 
     try {
       const res = await api.post('/auth/login', { email, password });
+
       localStorage.setItem('token', res.data.token);
+      localStorage.setItem('role', res.data.role); // 🔹 store role from backend response
+
       addToast('success', 'Login successful!');
+
+      setTimeout(() => {
+        navigate('/dashboard'); // 🔹 redirect to dashboard
+      }, 800);
     } catch (err: any) {
       addToast('danger', err.response?.data?.message || err.message || 'Something went wrong');
     }

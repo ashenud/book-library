@@ -4,10 +4,17 @@ import User from '../models/User.js';
 
 export const register = async (request, response) => {
   try {
-    const { name, email, password } = request.body;
-    const hashed = await bcrypt.hash(password, 10);
+    const { name, email, password, phone, address, role } = request.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    await User.create({ name, email, password: hashed });
+    await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      phone,
+      address,
+      role: role || 'user',
+    });
 
     response.json({ message: 'User registered successfully' });
   } catch (error) {
@@ -22,13 +29,13 @@ export const login = async (request, response) => {
 
     if (!user) return response.status(404).json({ error: 'User not found' });
 
-    const valid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(password, user.password);
 
-    if (!valid) return response.status(401).json({ error: 'Invalid credentials' });
+    if (!isPasswordValid) return response.status(401).json({ error: 'Invalid credentials' });
 
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '5m' });
 
-    response.json({ message: 'Login successful', token });
+    response.json({ message: 'Login successful', token, role: user.role });
   } catch (error) {
     response.status(500).json({ error: 'Login failed', details: error.message });
   }
