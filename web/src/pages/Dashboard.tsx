@@ -5,9 +5,11 @@ import api from '../services/api';
 
 interface User {
   id: number;
+  role: 'admin' | 'user';
   name: string;
   email: string;
-  role: 'admin' | 'user';
+  phone?: string;
+  address?: string;
 }
 
 const Dashboard = () => {
@@ -35,7 +37,7 @@ const Dashboard = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-			setUsers(res.data);
+      setUsers(res.data);
     } catch (err: any) {
       addToast('danger', err.response?.data?.error || 'Failed to fetch users');
     }
@@ -107,10 +109,7 @@ const Dashboard = () => {
                 <td>{u.email}</td>
                 <td>{u.role}</td>
                 <td>
-                  <button
-										className='btn btn-sm btn-warning me-2'
-										onClick={() => handleEdit(u)}
-									>
+                  <button className='btn btn-sm btn-warning me-2' onClick={() => handleEdit(u)}>
                     View
                   </button>
                   <button
@@ -133,17 +132,36 @@ const Dashboard = () => {
           <Modal.Title>Edit User</Modal.Title>
         </Modal.Header>
         <Modal.Body>
+          <label>Name</label>
           <input
             type='text'
             className='form-control mb-2'
             value={selectedUser?.name || ''}
             onChange={(e) => setSelectedUser({ ...selectedUser!, name: e.target.value })}
           />
+
+          <label>Email</label>
           <input
             type='email'
             className='form-control mb-2'
             value={selectedUser?.email || ''}
-            onChange={(e) => setSelectedUser({ ...selectedUser!, email: e.target.value })}
+            disabled
+          />
+
+          <label>Phone</label>
+          <input
+            type='text'
+            className='form-control mb-2'
+            value={selectedUser?.phone || ''}
+            onChange={(e) => setSelectedUser({ ...selectedUser!, phone: e.target.value })}
+          />
+
+          <label>Address</label>
+          <input
+            type='text'
+            className='form-control mb-2'
+            value={selectedUser?.address || ''}
+            onChange={(e) => setSelectedUser({ ...selectedUser!, address: e.target.value })}
           />
         </Modal.Body>
         <Modal.Footer>
@@ -151,10 +169,10 @@ const Dashboard = () => {
             Close
           </Button>
           <Button
-						variant='primary'
-						onClick={handleSave}
-						disabled={selectedUser?.id !== loggedUser?.id && loggedUser?.role !== 'admin'}
-					>
+            variant='primary'
+            onClick={handleSave}
+            disabled={selectedUser?.id !== loggedUser?.id && loggedUser?.role !== 'admin'}
+          >
             Save Changes
           </Button>
         </Modal.Footer>
