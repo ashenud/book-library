@@ -5,8 +5,8 @@ import { authenticate, isAdmin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.get('/', authenticate, isAdmin, getUsers); // admin only
-router.get('/', authenticate, isAdmin, getUser); // admin only
+router.get('/', authenticate, getUsers); // admin only
+router.get('/:id', authenticate, getUser);
 router.get('/me', authenticate, getUserProfile); // current user profile
 router.put('/:id', authenticate, updateUser); // self or admin
 router.delete('/:id', authenticate, isAdmin, deleteUser); // admin only

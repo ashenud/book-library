@@ -25,7 +25,7 @@ const Login = () => {
       const res = await api.post('/auth/login', { email, password });
 
       localStorage.setItem('token', res.data.token);
-      localStorage.setItem('role', res.data.role); // 🔹 store role from backend response
+      localStorage.setItem('user', JSON.stringify(res.data.user));
 
       addToast('success', 'Login successful!');
 

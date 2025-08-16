@@ -17,7 +17,8 @@ const Dashboard = () => {
   const [toasts, setToasts] = useState<{ id: number; type?: 'success' | 'danger'; message: string }[]>([]);
 
   const token = localStorage.getItem('token');
-  const role = localStorage.getItem('role');
+  const userString = localStorage.getItem('user');
+  const loggedUser = userString ? JSON.parse(userString) : null;
 
   const addToast = (type: 'success' | 'danger', message: string) => {
     const id = Date.now();
@@ -29,18 +30,12 @@ const Dashboard = () => {
   };
 
   const fetchUsers = async () => {
-    const url = role === 'admin' ? '/users' : '/users/me';
-
     try {
-      const res = await api.get(url, {
+      const res = await api.get('/users', {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (Array.isArray(res.data)) {
-        setUsers(res.data);
-      } else {
-        setUsers([res.data]); // wrap single object into array
-      }
+			setUsers(res.data);
     } catch (err: any) {
       addToast('danger', err.response?.data?.error || 'Failed to fetch users');
     }
@@ -53,7 +48,7 @@ const Dashboard = () => {
   const handleDelete = async (id: number) => {
     try {
       await api.delete(`/users/${id}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
     } catch (error) {
       addToast('danger', 'Failed to delete user');
@@ -72,7 +67,7 @@ const Dashboard = () => {
 
     try {
       await api.put(`/users/${selectedUser.id}`, selectedUser, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       addToast('success', 'User updated successfully');
@@ -94,36 +89,43 @@ const Dashboard = () => {
   return (
     <div className='container mt-4'>
       <h1>Dashboard</h1>
-        <>
-          <h3>User Management</h3>
-          <table className='table table-striped'>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Actions</th>
+      <>
+        <h3>User Management</h3>
+        <table className='table table-striped'>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users?.map((u) => (
+              <tr key={u.id}>
+                <td>{u.name}</td>
+                <td>{u.email}</td>
+                <td>{u.role}</td>
+                <td>
+                  <button
+										className='btn btn-sm btn-warning me-2'
+										onClick={() => handleEdit(u)}
+									>
+                    View
+                  </button>
+                  <button
+                    className='btn btn-sm btn-danger'
+                    onClick={() => handleDelete(u.id)}
+                    disabled={loggedUser?.role !== 'admin' || loggedUser?.id === u.id}
+                  >
+                    Delete
+                  </button>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {users?.map((u) => (
-                <tr key={u.id}>
-                  <td>{u.name}</td>
-                  <td>{u.email}</td>
-                  <td>{u.role}</td>
-                  <td>
-                    <button className='btn btn-sm btn-warning me-2' onClick={() => handleEdit(u)}>
-                      Edit
-                    </button>
-                    <button className='btn btn-sm btn-danger' onClick={() => handleDelete(u.id)}>
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </>
+            ))}
+          </tbody>
+        </table>
+      </>
 
       {/* Edit Modal */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
@@ -148,7 +150,11 @@ const Dashboard = () => {
           <Button variant='secondary' onClick={() => setShowModal(false)}>
             Close
           </Button>
-          <Button variant='primary' onClick={handleSave}>
+          <Button
+						variant='primary'
+						onClick={handleSave}
+						disabled={selectedUser?.id !== loggedUser?.id && loggedUser?.role !== 'admin'}
+					>
             Save Changes
           </Button>
         </Modal.Footer>
