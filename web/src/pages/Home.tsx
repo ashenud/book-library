@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import api from '../services/api';
+import ToastContainer from '../components/ToastContainer';
 
 const Home = () => {
   const [title, setTitle] = useState('');
@@ -7,6 +8,17 @@ const Home = () => {
   const [year, setYear] = useState('');
   const [distance, setDistance] = useState('');
   const [books, setBooks] = useState<any[]>([]);
+  const [isLoggedIn] = useState(!!localStorage.getItem('token'));
+  const [toasts, setToasts] = useState<{ id: number; type?: 'success' | 'danger'; message: string }[]>([]);
+
+  const addToast = (type: 'success' | 'danger', message: string) => {
+    const id = Date.now();
+    setToasts((prev) => [...prev, { id, type, message }]);
+  };
+
+  const removeToast = (id: number) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
 
   const searchBooks = async () => {
     let userLat = 0;
@@ -33,9 +45,24 @@ const Home = () => {
     setBooks(res.data);
   };
 
+  const addToMyBooks = async (bookId: number, status: string) => {
+    try {
+      await api.post(
+        '/books/user-books',
+        { bookId, status },
+        { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+      );
+
+      addToast('success', `Book marked as ${status}`);
+    } catch (err) {
+      addToast('danger', 'Error saving book status');
+    }
+  };
+
   return (
     <div className='container mt-4'>
       <h1>Public Book Search</h1>
+      {/* Search Bar */}
       <div className='row mb-3'>
         <div className='col-md-3'>
           <input
@@ -70,6 +97,8 @@ const Home = () => {
           </button>
         </div>
       </div>
+
+      {/* Book Results */}
       <table className='table table-bordered'>
         <thead>
           <tr>
@@ -78,6 +107,7 @@ const Home = () => {
             <th>Author</th>
             <th>Year</th>
             <th>Library</th>
+            {isLoggedIn && <th className='text-center'>Actions</th>}
           </tr>
         </thead>
         <tbody>
@@ -88,10 +118,28 @@ const Home = () => {
               <td>{b.author}</td>
               <td>{b.year}</td>
               <td>{b.library_name}</td>
+              {isLoggedIn && (
+                <td className='text-center'>
+                  <button className='btn btn-sm btn-success me-1' onClick={() => addToMyBooks(b.id, 'read')}>
+                    Read
+                  </button>
+                  <button className='btn btn-sm btn-info me-1' onClick={() => addToMyBooks(b.id, 'reviewed')}>
+                    Reviewed
+                  </button>
+                  <button className='btn btn-sm btn-warning me-1' onClick={() => addToMyBooks(b.id, 'wishlisted')}>
+                    Wish
+                  </button>
+                  <button className='btn btn-sm btn-primary' onClick={() => addToMyBooks(b.id, 'purchased')}>
+                    Purchased
+                  </button>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
       </table>
+
+      <ToastContainer toasts={toasts} removeToast={removeToast} />
     </div>
   );
 };
