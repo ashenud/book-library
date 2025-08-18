@@ -126,7 +126,7 @@ const Home = () => {
                   <button className='btn btn-sm btn-info me-1' onClick={() => addToMyBooks(b.id, 'reviewed')}>
                     Reviewed
                   </button>
-                  <button className='btn btn-sm btn-warning me-1' onClick={() => addToMyBooks(b.id, 'wishlisted')}>
+                  <button className='btn btn-sm btn-warning me-1' onClick={() => addToMyBooks(b.id, 'wishlist')}>
                     Wish
                   </button>
                   <button className='btn btn-sm btn-primary' onClick={() => addToMyBooks(b.id, 'purchased')}>

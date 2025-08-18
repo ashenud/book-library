@@ -54,14 +54,14 @@ export const getBooks = async (request, response) => {
 };
 
 // Add book to "My Books"
-export const addUserBook = async (req, res) => {
+export const addUserBook = async (request, response) => {
   try {
-    const { bookId, status } = req.body;
-    const userId = req.user.id; // from auth middleware
+    const { bookId, status } = request.body;
+    const userId = request.user.id; // from auth middleware
 
     const validStatuses = ['read', 'reviewed', 'wishlist', 'purchased'];
     if (!validStatuses.includes(status)) {
-      return res.status(400).json({ message: 'Invalid status' });
+      return response.status(400).json({ message: 'Invalid status' });
     }
 
     // check if already exists
@@ -82,10 +82,10 @@ export const addUserBook = async (req, res) => {
       });
     }
 
-    res.json({ message: '✅ Book added/updated successfully', userBook });
+    response.json({ message: 'Book added/updated successfully', userBook });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: err.message || 'Error adding book' });
+    response.status(500).json({ message: err.message || 'Error adding book' });
   }
 };
 
@@ -94,16 +94,13 @@ export const getUserBooks = async (request, response) => {
   try {
     const userId = request.user.id;
 
-    const [rows] = await db.query(
-      `SELECT b.*, ub.status
-       FROM user_books ub
-       JOIN books b ON ub.book_id = b.id
-       WHERE ub.user_id = ?`,
-      [userId]
-    );
+    const userBooks = await UserBook.findAll({
+      where: { user_id: userId },
+      include: [{ model: Book, attributes: ['id', 'title', 'author', 'year', 'library_name'] }],
+    });
 
-    response.json(rows);
+    response.json(userBooks);
   } catch (err) {
-    response.status(500).json({ message: 'Error fetching user books' });
+    response.status(500).json({ error: err.message || 'Failed to fetch user books' });
   }
 };

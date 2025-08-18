@@ -21,7 +21,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/books', bookRoutes);
 app.use('/api/users', userRoutes);
 
-sequelize.sync({ alter: true }).then(async () => {
+sequelize.sync({ force: true }).then(async () => {
   console.log('✅ Database connected and synced');
 
   // Run seeder

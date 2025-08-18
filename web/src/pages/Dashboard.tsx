@@ -12,8 +12,26 @@ interface User {
   address?: string;
 }
 
+interface UserBook {
+  id: number;
+  user_id: number;
+  book_id: number;
+  status: string;
+  review_text?: string;
+  Book?: {
+    id: number;
+    title: string;
+    author: string;
+  };
+  User?: {
+    id: number;
+    name: string;
+  };
+}
+
 const Dashboard = () => {
   const [users, setUsers] = useState<User[]>([]);
+  const [userBooks, setUserBooks] = useState<UserBook[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [toasts, setToasts] = useState<{ id: number; type?: 'success' | 'danger'; message: string }[]>([]);
@@ -43,8 +61,21 @@ const Dashboard = () => {
     }
   };
 
+  const fetchUserBooks = async () => {
+    try {
+      const res = await api.get('/books/user-books', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setUserBooks(res.data);
+    } catch (err: any) {
+      addToast('danger', err.response?.data?.error || 'Failed to fetch user books');
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
+    fetchUserBooks();
   }, []);
 
   const handleDelete = async (id: number) => {
@@ -81,52 +112,85 @@ const Dashboard = () => {
     fetchUsers();
   };
 
-  if (!users) {
-    <div className='container mt-4'>
-      <h1>Dashboard</h1>
-      <p>Loading...</p>;
-    </div>;
+  if (!users || !userBooks) {
+    return (
+      <div className='container mt-4'>
+        <h1>Dashboard</h1>
+        <p>Loading...</p>
+      </div>
+    );
   }
 
   return (
     <div className='container mt-4'>
       <h1>Dashboard</h1>
-      <>
-        <h3>User Management</h3>
-        <table className='table table-striped'>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users?.map((u) => (
-              <tr key={u.id}>
-                <td>{u.name}</td>
-                <td>{u.email}</td>
-                <td>{u.role}</td>
-                <td>
-                  <button className='btn btn-sm btn-warning me-2' onClick={() => handleEdit(u)}>
-                    View
-                  </button>
-                  <button
-                    className='btn btn-sm btn-danger'
-                    onClick={() => handleDelete(u.id)}
-                    disabled={loggedUser?.role !== 'admin' || loggedUser?.id === u.id}
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </>
 
-      {/* Edit Modal */}
+      {/* User Books Section */}
+      <h3>User Books</h3>
+      <table className='table table-bordered table-striped'>
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Book</th>
+            <th>Status</th>
+            <th>Review</th>
+          </tr>
+        </thead>
+        <tbody>
+          {userBooks.length === 0 ? (
+            <tr>
+              <td colSpan={4} className='text-center'>
+                No user books found
+              </td>
+            </tr>
+          ) : (
+            userBooks.map((ub) => (
+              <tr key={ub.id}>
+                <td>{ub.User?.name || ub.user_id}</td>
+                <td>{ub.Book?.title || ub.book_id}</td>
+                <td>{ub.status}</td>
+                <td>{ub.review_text || '-'}</td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+
+      {/* User Management Section */}
+      <h3>User Management</h3>
+      <table className='table table-striped'>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {users?.map((u) => (
+            <tr key={u.id}>
+              <td>{u.name}</td>
+              <td>{u.email}</td>
+              <td>{u.role}</td>
+              <td>
+                <button className='btn btn-sm btn-warning me-2' onClick={() => handleEdit(u)}>
+                  View
+                </button>
+                <button
+                  className='btn btn-sm btn-danger'
+                  onClick={() => handleDelete(u.id)}
+                  disabled={loggedUser?.role !== 'admin' || loggedUser?.id === u.id}
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {/* Edit User Modal */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Edit User</Modal.Title>
@@ -141,12 +205,7 @@ const Dashboard = () => {
           />
 
           <label>Email</label>
-          <input
-            type='email'
-            className='form-control mb-2'
-            value={selectedUser?.email || ''}
-            disabled
-          />
+          <input type='email' className='form-control mb-2' value={selectedUser?.email || ''} disabled />
 
           <label>Phone</label>
           <input
