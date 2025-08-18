@@ -110,7 +110,7 @@ const Home = () => {
 
       {/* Search Bar */}
       <div className='row mb-3'>
-        <div className='col-md-3'>
+        <div className='col-md-3 p-2'>
           <input
             className='form-control'
             placeholder='Title'
@@ -118,7 +118,7 @@ const Home = () => {
             onChange={(e) => setTitle(e.target.value)}
           />
         </div>
-        <div className='col-md-3'>
+        <div className='col-md-3 p-2'>
           <input
             className='form-control'
             placeholder='Author'
@@ -126,10 +126,10 @@ const Home = () => {
             onChange={(e) => setAuthor(e.target.value)}
           />
         </div>
-        <div className='col-md-2'>
+        <div className='col-md-2 p-2'>
           <input className='form-control' placeholder='Year' value={year} onChange={(e) => setYear(e.target.value)} />
         </div>
-        <div className='col-md-2'>
+        <div className='col-md-2 p-2'>
           <select className='form-select' value={distance} onChange={(e) => setDistance(e.target.value)}>
             <option value=''>Any Distance</option>
             <option value='1'>Within 1 km</option>
@@ -137,7 +137,7 @@ const Home = () => {
             <option value='20'>Within 20 km</option>
           </select>
         </div>
-        <div className='col-md-2'>
+        <div className='col-md-2 p-2'>
           <button className='btn btn-primary w-100' onClick={searchBooks}>
             Search
           </button>
@@ -160,101 +160,103 @@ const Home = () => {
       )}
 
       {/* Books Table */}
-      <table className='table table-bordered'>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Title</th>
-            <th>Author</th>
-            <th>Year</th>
-            <th>Library</th>
-            {isLoggedIn && <th className='text-center'>Actions</th>}
-          </tr>
-        </thead>
-        <tbody>
-          {paginatedBooks.map(
-            (book) => (
-              console.log(book),
-              (
-                <tr key={book.id}>
-                  <td>{book.id}</td>
-                  <td>{book.title}</td>
-                  <td>{book.author}</td>
-                  <td>{book.year}</td>
-                  <td>{book.library_name}</td>
-                  {isLoggedIn && (
-                    <td className='text-center'>
-                      <OverlayTrigger
-                        placement='top'
-                        overlay={<Tooltip id={`tooltip-read-${book.id}`}>Mark as Read</Tooltip>}
-                      >
-                        <button
-                          className={clsx(
-                            'btn btn-sm me-1',
-                            book.user_books?.[0]?.status === 'read' ? 'btn-secondary' : 'btn-success'
-                          )}
-                          onClick={() => addToMyBooks(book.id, 'read')}
-                          disabled={book.user_books?.[0]?.status === 'read'}
+      <div className='table-responsive'>
+        <table className='table table-bordered table-hover'>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Title</th>
+              <th>Author</th>
+              <th>Year</th>
+              <th>Library</th>
+              {isLoggedIn && <th className='text-center'>Actions</th>}
+            </tr>
+          </thead>
+          <tbody>
+            {paginatedBooks.map(
+              (book) => (
+                console.log(book),
+                (
+                  <tr key={book.id}>
+                    <td>{book.id}</td>
+                    <td>{book.title}</td>
+                    <td>{book.author}</td>
+                    <td>{book.year}</td>
+                    <td>{book.library_name}</td>
+                    {isLoggedIn && (
+                      <td className='text-center'>
+                        <OverlayTrigger
+                          placement='top'
+                          overlay={<Tooltip id={`tooltip-read-${book.id}`}>Mark as Read</Tooltip>}
                         >
-                          <FaBook />
-                        </button>
-                      </OverlayTrigger>
+                          <button
+                            className={clsx(
+                              'btn btn-sm m-1',
+                              book.user_books?.[0]?.status === 'read' ? 'btn-secondary' : 'btn-success'
+                            )}
+                            onClick={() => addToMyBooks(book.id, 'read')}
+                            disabled={book.user_books?.[0]?.status === 'read'}
+                          >
+                            <FaBook />
+                          </button>
+                        </OverlayTrigger>
 
-                      <OverlayTrigger
-                        placement='top'
-                        overlay={<Tooltip id={`tooltip-reviewed-${book.id}`}>Mark as Reviewed</Tooltip>}
-                      >
-                        <button
-                          className={clsx(
-                            'btn btn-sm me-1',
-                            book.user_books?.[0]?.status === 'reviewed' ? 'btn-secondary' : 'btn-info'
-                          )}
-                          onClick={() => addToMyBooks(book.id, 'reviewed')}
-                          disabled={book.user_books?.[0]?.status === 'reviewed'}
+                        <OverlayTrigger
+                          placement='top'
+                          overlay={<Tooltip id={`tooltip-reviewed-${book.id}`}>Mark as Reviewed</Tooltip>}
                         >
-                          <FaCheck />
-                        </button>
-                      </OverlayTrigger>
+                          <button
+                            className={clsx(
+                              'btn btn-sm m-1',
+                              book.user_books?.[0]?.status === 'reviewed' ? 'btn-secondary' : 'btn-info'
+                            )}
+                            onClick={() => addToMyBooks(book.id, 'reviewed')}
+                            disabled={book.user_books?.[0]?.status === 'reviewed'}
+                          >
+                            <FaCheck />
+                          </button>
+                        </OverlayTrigger>
 
-                      <OverlayTrigger
-                        placement='top'
-                        overlay={<Tooltip id={`tooltip-wishlist-${book.id}`}>Add to Wishlist</Tooltip>}
-                      >
-                        <button
-                          className={clsx(
-                            'btn btn-sm me-1',
-                            book.user_books?.[0]?.status === 'wishlist' ? 'btn-secondary' : 'btn-warning'
-                          )}
-                          onClick={() => addToMyBooks(book.id, 'wishlist')}
-                          disabled={book.user_books?.[0]?.status === 'wishlist'}
+                        <OverlayTrigger
+                          placement='top'
+                          overlay={<Tooltip id={`tooltip-wishlist-${book.id}`}>Add to Wishlist</Tooltip>}
                         >
-                          <FaHeart />
-                        </button>
-                      </OverlayTrigger>
+                          <button
+                            className={clsx(
+                              'btn btn-sm m-1',
+                              book.user_books?.[0]?.status === 'wishlist' ? 'btn-secondary' : 'btn-warning'
+                            )}
+                            onClick={() => addToMyBooks(book.id, 'wishlist')}
+                            disabled={book.user_books?.[0]?.status === 'wishlist'}
+                          >
+                            <FaHeart />
+                          </button>
+                        </OverlayTrigger>
 
-                      <OverlayTrigger
-                        placement='top'
-                        overlay={<Tooltip id={`tooltip-purchased-${book.id}`}>Mark as Purchased</Tooltip>}
-                      >
-                        <button
-                          className={clsx(
-                            'btn btn-sm me-1',
-                            book.user_books?.[0]?.status === 'purchased' ? 'btn-secondary' : 'btn-primary'
-                          )}
-                          onClick={() => addToMyBooks(book.id, 'purchased')}
-                          disabled={book.user_books?.[0]?.status === 'purchased'}
+                        <OverlayTrigger
+                          placement='top'
+                          overlay={<Tooltip id={`tooltip-purchased-${book.id}`}>Mark as Purchased</Tooltip>}
                         >
-                          <FaShoppingCart />
-                        </button>
-                      </OverlayTrigger>
-                    </td>
-                  )}
-                </tr>
+                          <button
+                            className={clsx(
+                              'btn btn-sm m-1',
+                              book.user_books?.[0]?.status === 'purchased' ? 'btn-secondary' : 'btn-primary'
+                            )}
+                            onClick={() => addToMyBooks(book.id, 'purchased')}
+                            disabled={book.user_books?.[0]?.status === 'purchased'}
+                          >
+                            <FaShoppingCart />
+                          </button>
+                        </OverlayTrigger>
+                      </td>
+                    )}
+                  </tr>
+                )
               )
-            )
-          )}
-        </tbody>
-      </table>
+            )}
+          </tbody>
+        </table>
+      </div>
 
       {/* Pagination */}
       <Pagination className='justify-content-center'>
