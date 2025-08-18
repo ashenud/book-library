@@ -16,16 +16,23 @@ const authors = [
 
 // Define each library with fixed coordinates
 const libraries = [
-  { name: 'City Library', lat: 6.886, lng: 79.9545 },
-  { name: 'Central Library', lat: 6.8845, lng: 79.953 },
-  { name: 'Town Library', lat: 6.975, lng: 80.05 },
-  { name: 'District Library', lat: 6.97, lng: 80.06 },
-  { name: 'Village Library', lat: 7.08, lng: 80.12 },
-  { name: 'Remote Library', lat: 7.09, lng: 80.11 },
-  { name: 'Local Library', lat: 6.887, lng: 79.955 },
-  { name: 'Neighborhood Library', lat: 6.8835, lng: 79.9525 },
-  { name: 'Far Town Library', lat: 6.97, lng: 80.055 },
-  { name: 'Far Village Library', lat: 7.075, lng: 80.125 },
+  // Within 1 km
+  { name: 'City Library', lat: 6.8865, lng: 79.9545 },
+  { name: 'Neighborhood Library', lat: 6.8845, lng: 79.953 },
+
+  // Within 1–10 km
+  { name: 'Town Library', lat: 6.935, lng: 79.99 },
+  { name: 'Village Library', lat: 6.945, lng: 80.01 },
+
+  // Within 10–20 km
+  { name: 'Central Library', lat: 7.02, lng: 80.06 },
+  { name: 'District Library', lat: 7.05, lng: 80.08 },
+
+  // Within 20–50 km
+  { name: 'Local Library', lat: 6.8, lng: 80.2 },
+  { name: 'Remote Library', lat: 6.75, lng: 80.15 },
+  { name: 'Far Town Library', lat: 6.7, lng: 80.25 },
+  { name: 'Far Village Library', lat: 6.65, lng: 80.3 },
 ];
 
 export const seedBooks = async (count = 1000) => {

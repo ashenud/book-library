@@ -169,6 +169,7 @@ const Home = () => {
               <th>Author</th>
               <th>Year</th>
               <th>Library</th>
+              <th>Distance</th>
               {isLoggedIn && <th className='text-center'>Actions</th>}
             </tr>
           </thead>
@@ -183,6 +184,7 @@ const Home = () => {
                     <td>{book.author}</td>
                     <td>{book.year}</td>
                     <td>{book.library_name}</td>
+                    <td>{book.distance ? `${book.distance} Km` : '-'}</td>
                     {isLoggedIn && (
                       <td className='text-center'>
                         <OverlayTrigger

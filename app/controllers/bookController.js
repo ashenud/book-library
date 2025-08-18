@@ -52,8 +52,7 @@ export const getBooks = async (request, response) => {
         });
 
         const distanceData = responseMatrix.data.rows[0].elements[0];
-        const distanceInMeters = distanceData.distance?.value || 0;
-        const distanceInKm = distanceInMeters / 1000;
+        const distanceInKm = (distanceData.distance?.value || 0) / 1000;
 
         if (distanceInKm <= Number(maxDistance)) {
           booksWithDistance.push({ ...book.toJSON(), distance: distanceInKm });
