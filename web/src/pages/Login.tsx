@@ -30,7 +30,7 @@ const Login = () => {
       addToast('success', 'Login successful!');
 
       setTimeout(() => {
-        navigate('/dashboard'); // 🔹 redirect to dashboard
+        navigate('/my-books'); // 🔹 redirect to my-books
       }, 800);
     } catch (err: any) {
       addToast('danger', err.response?.data?.message || err.message || 'Something went wrong');

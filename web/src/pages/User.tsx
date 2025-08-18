@@ -12,26 +12,8 @@ interface User {
   address?: string;
 }
 
-interface UserBook {
-  id: number;
-  user_id: number;
-  book_id: number;
-  status: string;
-  review_text?: string;
-  Book?: {
-    id: number;
-    title: string;
-    author: string;
-  };
-  User?: {
-    id: number;
-    name: string;
-  };
-}
-
-const Dashboard = () => {
+const User = () => {
   const [users, setUsers] = useState<User[]>([]);
-  const [userBooks, setUserBooks] = useState<UserBook[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [toasts, setToasts] = useState<{ id: number; type?: 'success' | 'danger'; message: string }[]>([]);
@@ -61,21 +43,8 @@ const Dashboard = () => {
     }
   };
 
-  const fetchUserBooks = async () => {
-    try {
-      const res = await api.get('/books/user-books', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      setUserBooks(res.data);
-    } catch (err: any) {
-      addToast('danger', err.response?.data?.error || 'Failed to fetch user books');
-    }
-  };
-
   useEffect(() => {
     fetchUsers();
-    fetchUserBooks();
   }, []);
 
   const handleDelete = async (id: number) => {
@@ -112,10 +81,10 @@ const Dashboard = () => {
     fetchUsers();
   };
 
-  if (!users || !userBooks) {
+  if (!users) {
     return (
       <div className='container mt-4'>
-        <h1>Dashboard</h1>
+        <h1>User Management</h1>
         <p>Loading...</p>
       </div>
     );
@@ -123,40 +92,6 @@ const Dashboard = () => {
 
   return (
     <div className='container mt-4'>
-      <h1>Dashboard</h1>
-
-      {/* User Books Section */}
-      <h3>User Books</h3>
-      <table className='table table-bordered table-striped'>
-        <thead>
-          <tr>
-            <th>User</th>
-            <th>Book</th>
-            <th>Status</th>
-            <th>Review</th>
-          </tr>
-        </thead>
-        <tbody>
-          {userBooks.length === 0 ? (
-            <tr>
-              <td colSpan={4} className='text-center'>
-                No user books found
-              </td>
-            </tr>
-          ) : (
-            userBooks.map((ub) => (
-              <tr key={ub.id}>
-                <td>{ub.User?.name || ub.user_id}</td>
-                <td>{ub.Book?.title || ub.book_id}</td>
-                <td>{ub.status}</td>
-                <td>{ub.review_text || '-'}</td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-
-      {/* User Management Section */}
       <h3>User Management</h3>
       <table className='table table-striped'>
         <thead>
@@ -242,4 +177,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default User;
