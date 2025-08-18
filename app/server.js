@@ -10,7 +10,7 @@ import './models/associations.js';
 import authRoutes from './routes/authRoutes.js';
 import bookRoutes from './routes/bookRoutes.js';
 import userRoutes from './routes/userRoutes.js';
-import { seedDatabase } from './seed/seedData.js';
+import { seedDatabase } from './seeds/seedData.js';
 
 dotenv.config();
 

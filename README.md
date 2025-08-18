@@ -120,17 +120,33 @@ The database will be **automatically dropped and recreated**, and sample data wi
 
 ```
 // app/server.js
-sequelize.sync({ force: true });
+sequelize.sync({ force: true }).then(async () => {
+  console.log('✅ Database connected and synced');
+
+  // Run seeder
+  await seedDatabase();
+
+  app.listen(process.env.PORT, () => {
+    console.log(`🚀 Server running on port ${process.env.PORT}`);
+  });
+});
 ```
 
 > ⚠️ **Warning:** This will erase all existing data on every server restart.
-> To prevent automatic table recreation and seeding, change `force: true` to `false`:
+
+To preserve your existing database and avoid automatic recreation/seeding, remove sequelize.sync({ force: true }) and simply start the server:
 
 ```
-sequelize.sync({ force: false });
+app.listen(process.env.PORT, () => {
+  console.log(`🚀 Server running on port ${process.env.PORT}`);
+});
 ```
 
-This will preserve your existing database.
+You can also manually populate the database using the SQL dump provided:
+
+```
+/app/dumps/book-library.sql
+```
 
 ### 5. Run the Application
 
