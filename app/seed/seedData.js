@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import Book from '../models/Book.js';
 import User from '../models/User.js';
 import { seedBooks } from './seedBooks.js';
+import { seedLibrary } from './seedLibrary.js';
 
 export const seedDatabase = async () => {
   // Clean tables
@@ -63,6 +64,7 @@ export const seedDatabase = async () => {
   ]);
 
   // Seed Books
+  await seedLibrary();
   await seedBooks(100);
 
   console.log('✅ Sample data inserted successfully');

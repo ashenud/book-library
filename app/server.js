@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import express from 'express';
 import sequelize from './config/db.js';
 import './models/Book.js';
+import './models/Library.js';
 import './models/User.js';
 import './models/UserBook.js';
 import './models/associations.js';

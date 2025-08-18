@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker';
 import Book from '../models/Book.js';
+import Library from '../models/Library.js';
 
 const authors = [
   'J.K. Rowling',
@@ -14,31 +15,19 @@ const authors = [
   'Leo Tolstoy',
 ];
 
-// Define each library with fixed coordinates
-const libraries = [
-  // Within 1 km
-  { name: 'City Library', lat: 6.8865, lng: 79.9545 },
-  { name: 'Neighborhood Library', lat: 6.8845, lng: 79.953 },
-
-  // Within 1–10 km
-  { name: 'Town Library', lat: 6.935, lng: 79.99 },
-  { name: 'Village Library', lat: 6.945, lng: 80.01 },
-
-  // Within 10–20 km
-  { name: 'Central Library', lat: 7.02, lng: 80.06 },
-  { name: 'District Library', lat: 7.05, lng: 80.08 },
-
-  // Within 20–50 km
-  { name: 'Local Library', lat: 6.8, lng: 80.2 },
-  { name: 'Remote Library', lat: 6.75, lng: 80.15 },
-  { name: 'Far Town Library', lat: 6.7, lng: 80.25 },
-  { name: 'Far Village Library', lat: 6.65, lng: 80.3 },
-];
-
 export const seedBooks = async (count = 1000) => {
+  // Fetch all libraries once
+  const libraries = await Library.findAll();
+
+  if (libraries.length === 0) {
+    console.log('No libraries found. Please seed libraries first.');
+    return;
+  }
+
   const books = [];
 
   for (let i = 0; i < count; i++) {
+    // Pick a random library
     const library = libraries[Math.floor(Math.random() * libraries.length)];
 
     const rawTitle = faker.lorem.words(Math.floor(Math.random() * 3) + 1);
@@ -51,12 +40,10 @@ export const seedBooks = async (count = 1000) => {
       title: title,
       author: authors[Math.floor(Math.random() * authors.length)],
       year: Math.floor(Math.random() * 22) + 2000,
-      library_name: library.name,
-      latitude: library.lat,
-      longitude: library.lng,
+      library_id: library.id,
     });
   }
 
   await Book.bulkCreate(books);
-  console.log(`✅ ${count} random books inserted successfully`);
+  console.log(`${count} random books inserted successfully`);
 };

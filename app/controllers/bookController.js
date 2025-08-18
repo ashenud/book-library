@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { Op } from 'sequelize';
 import Book from '../models/Book.js';
+import Library from '../models/Library.js';
 import UserBook from '../models/UserBook.js';
 
 const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
@@ -9,19 +10,59 @@ export const getBooks = async (request, response) => {
   try {
     const { title, author, year, userLat, userLng, maxDistance } = request.query;
 
-    let where = {};
+    const where = {};
 
+    // Step 1: Filters for title, author, year
     if (title) where.title = { [Op.like]: `%${title}%` };
     if (author) where.author = { [Op.like]: `%${author}%` };
     if (year) where.year = year;
 
-    // Step 1: Get books matching title/author/year
-
+    // Step 2: Identify logged-in user
     const authHeader = request.headers.authorization;
     const token = authHeader?.split(' ')[1];
-    const decoded = token && jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = token ? jwt.verify(token, process.env.JWT_SECRET) : null;
     const userId = decoded?.id || null;
 
+    // Step 3: Filter libraries by distance if location is provided
+    let librariesWithinDistance = [];
+
+    if (userLat && userLng && Number(maxDistance) > 0) {
+      const libraries = await Library.findAll();
+
+      const distanceRequests = libraries.map((library) => {
+        if (!library.latitude || !library.longitude) return null;
+
+        return axios
+          .get('https://maps.googleapis.com/maps/api/distancematrix/json', {
+            params: {
+              origins: `${userLat},${userLng}`,
+              destinations: `${library.latitude},${library.longitude}`,
+              key: GOOGLE_MAPS_API_KEY,
+              units: 'metric',
+            },
+          })
+          .then((response) => {
+            const distanceData = response.data.rows[0].elements[0];
+            const distanceInKm = (distanceData.distance?.value || 0) / 1000;
+
+            if (distanceInKm <= Number(maxDistance)) {
+              return { id: library.id, distance: distanceInKm };
+            }
+
+            return null;
+          });
+      });
+
+      librariesWithinDistance = (await Promise.all(distanceRequests)).filter(Boolean);
+
+      if (librariesWithinDistance.length > 0) {
+        where.library_id = {
+          [Op.in]: librariesWithinDistance.map((library) => library.id),
+        };
+      }
+    }
+
+    // Step 4: Fetch books with user status and library info
     const books = await Book.findAll({
       where,
       include: [
@@ -32,38 +73,31 @@ export const getBooks = async (request, response) => {
           required: false,
           attributes: ['status'],
         },
+        {
+          model: Library,
+          as: 'library',
+          required: true,
+          attributes: ['name'],
+        },
       ],
     });
 
-    // Step 2: If user location provided, calculate distance
-    if (userLat && userLng && Number(maxDistance) > 0) {
-      const booksWithDistance = [];
+    // Step 5: Attach distance to each book if applicable
+    const booksWithDistance = books.map((book) => {
+      const formattedBook = book.toJSON();
 
-      for (let book of books) {
-        if (!book.latitude || !book.longitude) continue;
+      if (librariesWithinDistance.length > 0) {
+        const libraries = librariesWithinDistance.find((library) => library.id === book.library_id);
 
-        const responseMatrix = await axios.get('https://maps.googleapis.com/maps/api/distancematrix/json', {
-          params: {
-            origins: `${userLat},${userLng}`,
-            destinations: `${book.latitude},${book.longitude}`,
-            key: GOOGLE_MAPS_API_KEY,
-            units: 'metric',
-          },
-        });
-
-        const distanceData = responseMatrix.data.rows[0].elements[0];
-        const distanceInKm = (distanceData.distance?.value || 0) / 1000;
-
-        if (distanceInKm <= Number(maxDistance)) {
-          booksWithDistance.push({ ...book.toJSON(), distance: distanceInKm });
+        if (libraries) {
+          formattedBook.library.distance = libraries.distance;
         }
       }
 
-      return response.json(booksWithDistance);
-    }
+      return formattedBook;
+    });
 
-    // Step 3: Return without distance filter
-    response.json(books);
+    response.json(booksWithDistance);
   } catch (err) {
     console.error(err);
     response.status(500).json({ error: 'Failed to fetch books' });
@@ -113,7 +147,20 @@ export const getUserBooks = async (request, response) => {
 
     const userBooks = await UserBook.findAll({
       where: { user_id: userId },
-      include: [{ model: Book, as: 'books', attributes: ['id', 'title', 'author', 'year', 'library_name'] }],
+      include: [
+        {
+          model: Book,
+          as: 'book',
+          attributes: ['id', 'title', 'author', 'year'],
+          include: [
+            {
+              model: Library,
+              as: 'library',
+              attributes: ['name'],
+            },
+          ],
+        },
+      ],
     });
 
     response.json(userBooks);

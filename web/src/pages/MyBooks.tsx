@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Button, Modal } from 'react-bootstrap';
 import ToastContainer from '../components/ToastContainer';
 import api from '../services/api';
 
@@ -9,10 +8,13 @@ interface UserBook {
   book_id: number;
   status: string;
   review_text?: string;
-  books?: {
+  book?: {
     id: number;
     title: string;
     author: string;
+    library: {
+      name: string;
+    };
   };
 }
 
@@ -64,6 +66,7 @@ const MyBooks = () => {
           <tr>
             <th>Author</th>
             <th>Book</th>
+            <th>Library</th>
             <th>Status</th>
           </tr>
         </thead>
@@ -77,8 +80,9 @@ const MyBooks = () => {
           ) : (
             userBooks.map((userBook) => (
               <tr key={userBook.id}>
-                <td>{userBook.books?.author}</td>
-                <td>{userBook.books?.title}</td>
+                <td>{userBook.book?.author}</td>
+                <td>{userBook.book?.title}</td>
+                <td>{userBook.book?.library?.name}</td>
                 <td>{userBook.status}</td>
               </tr>
             ))

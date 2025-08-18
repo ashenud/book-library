@@ -8,9 +8,10 @@ const Book = sequelize.define(
     title: { type: DataTypes.STRING, allowNull: false },
     author: { type: DataTypes.STRING, allowNull: false },
     year: { type: DataTypes.INTEGER, allowNull: false },
-    library_name: { type: DataTypes.STRING },
-    latitude: { type: DataTypes.DECIMAL(10, 6) },
-    longitude: { type: DataTypes.DECIMAL(10, 6) },
+    library_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
   },
   {
     timestamps: true,
