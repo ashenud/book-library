@@ -5,6 +5,7 @@ import sequelize from './config/db.js';
 import './models/Book.js';
 import './models/User.js';
 import './models/UserBook.js';
+import './models/associations.js';
 import authRoutes from './routes/authRoutes.js';
 import bookRoutes from './routes/bookRoutes.js';
 import userRoutes from './routes/userRoutes.js';

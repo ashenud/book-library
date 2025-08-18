@@ -10,12 +10,30 @@ export const getBooks = async (request, response) => {
     const { title, author, year, userLat, userLng, maxDistance } = request.query;
 
     let where = {};
+
     if (title) where.title = { [Op.like]: `%${title}%` };
     if (author) where.author = { [Op.like]: `%${author}%` };
     if (year) where.year = year;
 
     // Step 1: Get books matching title/author/year
-    const books = await Book.findAll({ where });
+
+    const authHeader = request.headers.authorization;
+    const token = authHeader?.split(' ')[1];
+    const decoded = token && jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded?.id || null;
+
+    const books = await Book.findAll({
+      where,
+      include: [
+        {
+          model: UserBook,
+          as: 'user_books',
+          where: userId ? { userId } : undefined,
+          required: false,
+          attributes: ['status'],
+        },
+      ],
+    });
 
     // Step 2: If user location provided, calculate distance
     if (userLat && userLng && Number(maxDistance) > 0) {
@@ -60,6 +78,7 @@ export const addUserBook = async (request, response) => {
     const userId = request.user.id; // from auth middleware
 
     const validStatuses = ['read', 'reviewed', 'wishlist', 'purchased'];
+
     if (!validStatuses.includes(status)) {
       return response.status(400).json({ message: 'Invalid status' });
     }
@@ -78,13 +97,12 @@ export const addUserBook = async (request, response) => {
       await UserBook.create({
         user_id: userId,
         book_id: bookId,
-        status: 'wishlist',
+        status: status,
       });
     }
 
     response.json({ message: 'Book added/updated successfully', userBook });
   } catch (err) {
-    console.error(err);
     response.status(500).json({ message: err.message || 'Error adding book' });
   }
 };
@@ -96,7 +114,7 @@ export const getUserBooks = async (request, response) => {
 
     const userBooks = await UserBook.findAll({
       where: { user_id: userId },
-      include: [{ model: Book, attributes: ['id', 'title', 'author', 'year', 'library_name'] }],
+      include: [{ model: Book, as: 'books', attributes: ['id', 'title', 'author', 'year', 'library_name'] }],
     });
 
     response.json(userBooks);

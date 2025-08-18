@@ -1,5 +1,7 @@
+import clsx from 'clsx';
 import { useEffect, useState } from 'react';
-import { Pagination, Spinner } from 'react-bootstrap';
+import { OverlayTrigger, Pagination, Spinner, Tooltip } from 'react-bootstrap';
+import { FaBook, FaCheck, FaHeart, FaShoppingCart } from 'react-icons/fa';
 import ToastContainer from '../components/ToastContainer';
 import api from '../services/api';
 
@@ -47,8 +49,11 @@ const Home = () => {
       setLoading(true);
 
       const res = await api.get(
-        `/books?title=${title}&author=${author}&year=${year}&userLat=${lat || 0}&userLng=${lng || 0}&maxDistance=${distance}`
+        `/books?title=${title}&author=${author}&year=${year}&userLat=${lat || 0}&userLng=${
+          lng || 0
+        }&maxDistance=${distance}`
       );
+
       setBooks(res.data);
       setCurrentPage(1);
     } catch (err) {
@@ -68,6 +73,8 @@ const Home = () => {
         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       );
       addToast('success', `Book marked as ${status}`);
+
+      searchBooks(); // Refresh book list after adding
     } catch (err) {
       addToast('danger', 'Error saving book status');
     }
@@ -165,31 +172,87 @@ const Home = () => {
           </tr>
         </thead>
         <tbody>
-          {paginatedBooks.map((b) => (
-            <tr key={b.id}>
-              <td>{b.id}</td>
-              <td>{b.title}</td>
-              <td>{b.author}</td>
-              <td>{b.year}</td>
-              <td>{b.library_name}</td>
-              {isLoggedIn && (
-                <td className='text-center'>
-                  <button className='btn btn-sm btn-success me-1' onClick={() => addToMyBooks(b.id, 'read')}>
-                    Read
-                  </button>
-                  <button className='btn btn-sm btn-info me-1' onClick={() => addToMyBooks(b.id, 'reviewed')}>
-                    Reviewed
-                  </button>
-                  <button className='btn btn-sm btn-warning me-1' onClick={() => addToMyBooks(b.id, 'wishlist')}>
-                    Wish
-                  </button>
-                  <button className='btn btn-sm btn-primary' onClick={() => addToMyBooks(b.id, 'purchased')}>
-                    Purchased
-                  </button>
-                </td>
-              )}
-            </tr>
-          ))}
+          {paginatedBooks.map(
+            (book) => (
+              console.log(book),
+              (
+                <tr key={book.id}>
+                  <td>{book.id}</td>
+                  <td>{book.title}</td>
+                  <td>{book.author}</td>
+                  <td>{book.year}</td>
+                  <td>{book.library_name}</td>
+                  {isLoggedIn && (
+                    <td className='text-center'>
+                      <OverlayTrigger
+                        placement='top'
+                        overlay={<Tooltip id={`tooltip-read-${book.id}`}>Mark as Read</Tooltip>}
+                      >
+                        <button
+                          className={clsx(
+                            'btn btn-sm me-1',
+                            book.user_books?.[0]?.status === 'read' ? 'btn-secondary' : 'btn-success'
+                          )}
+                          onClick={() => addToMyBooks(book.id, 'read')}
+                          disabled={book.user_books?.[0]?.status === 'read'}
+                        >
+                          <FaBook />
+                        </button>
+                      </OverlayTrigger>
+
+                      <OverlayTrigger
+                        placement='top'
+                        overlay={<Tooltip id={`tooltip-reviewed-${book.id}`}>Mark as Reviewed</Tooltip>}
+                      >
+                        <button
+                          className={clsx(
+                            'btn btn-sm me-1',
+                            book.user_books?.[0]?.status === 'reviewed' ? 'btn-secondary' : 'btn-info'
+                          )}
+                          onClick={() => addToMyBooks(book.id, 'reviewed')}
+                          disabled={book.user_books?.[0]?.status === 'reviewed'}
+                        >
+                          <FaCheck />
+                        </button>
+                      </OverlayTrigger>
+
+                      <OverlayTrigger
+                        placement='top'
+                        overlay={<Tooltip id={`tooltip-wishlist-${book.id}`}>Add to Wishlist</Tooltip>}
+                      >
+                        <button
+                          className={clsx(
+                            'btn btn-sm me-1',
+                            book.user_books?.[0]?.status === 'wishlist' ? 'btn-secondary' : 'btn-warning'
+                          )}
+                          onClick={() => addToMyBooks(book.id, 'wishlist')}
+                          disabled={book.user_books?.[0]?.status === 'wishlist'}
+                        >
+                          <FaHeart />
+                        </button>
+                      </OverlayTrigger>
+
+                      <OverlayTrigger
+                        placement='top'
+                        overlay={<Tooltip id={`tooltip-purchased-${book.id}`}>Mark as Purchased</Tooltip>}
+                      >
+                        <button
+                          className={clsx(
+                            'btn btn-sm me-1',
+                            book.user_books?.[0]?.status === 'purchased' ? 'btn-secondary' : 'btn-primary'
+                          )}
+                          onClick={() => addToMyBooks(book.id, 'purchased')}
+                          disabled={book.user_books?.[0]?.status === 'purchased'}
+                        >
+                          <FaShoppingCart />
+                        </button>
+                      </OverlayTrigger>
+                    </td>
+                  )}
+                </tr>
+              )
+            )
+          )}
         </tbody>
       </table>
 
