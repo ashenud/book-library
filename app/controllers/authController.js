@@ -33,7 +33,7 @@ export const login = async (request, response) => {
 
     if (!isPasswordValid) return response.status(401).json({ error: 'Invalid credentials' });
 
-    const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '5m' });
+    const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '2h' });
 
     response.json({
       message: 'Login successful',

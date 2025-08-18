@@ -9,14 +9,10 @@ interface UserBook {
   book_id: number;
   status: string;
   review_text?: string;
-  Book?: {
+  books?: {
     id: number;
     title: string;
     author: string;
-  };
-  User?: {
-    id: number;
-    name: string;
   };
 }
 
@@ -25,8 +21,6 @@ const MyBooks = () => {
   const [toasts, setToasts] = useState<{ id: number; type?: 'success' | 'danger'; message: string }[]>([]);
 
   const token = localStorage.getItem('token');
-  const userString = localStorage.getItem('user');
-  const loggedUser = userString ? JSON.parse(userString) : null;
 
   const addToast = (type: 'success' | 'danger', message: string) => {
     const id = Date.now();
@@ -68,10 +62,9 @@ const MyBooks = () => {
       <table className='table table-bordered table-striped'>
         <thead>
           <tr>
-            <th>User</th>
+            <th>Author</th>
             <th>Book</th>
             <th>Status</th>
-            <th>Review</th>
           </tr>
         </thead>
         <tbody>
@@ -82,12 +75,11 @@ const MyBooks = () => {
               </td>
             </tr>
           ) : (
-            userBooks.map((ub) => (
-              <tr key={ub.id}>
-                <td>{ub.User?.name || ub.user_id}</td>
-                <td>{ub.Book?.title || ub.book_id}</td>
-                <td>{ub.status}</td>
-                <td>{ub.review_text || '-'}</td>
+            userBooks.map((userBook) => (
+              <tr key={userBook.id}>
+                <td>{userBook.books?.author}</td>
+                <td>{userBook.books?.title}</td>
+                <td>{userBook.status}</td>
               </tr>
             ))
           )}
