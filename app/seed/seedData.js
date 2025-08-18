@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import Book from '../models/Book.js';
 import User from '../models/User.js';
+import { seedBooks } from './seedBooks.js';
 
 export const seedDatabase = async () => {
   // Clean tables
@@ -62,88 +63,7 @@ export const seedDatabase = async () => {
   ]);
 
   // Seed Books
-  await Book.bulkCreate([
-    {
-      title: 'Book 1',
-      author: 'Author A',
-      year: 2021,
-      library_name: 'City Library',
-      latitude: 6.886,
-      longitude: 79.9545,
-    },
-    {
-      title: 'Book 2',
-      author: 'Author B',
-      year: 2020,
-      library_name: 'Central Library',
-      latitude: 6.8845,
-      longitude: 79.953,
-    },
-    {
-      title: 'Book 3',
-      author: 'Author C',
-      year: 2019,
-      library_name: 'Town Library',
-      latitude: 6.975,
-      longitude: 80.05,
-    },
-    {
-      title: 'Book 4',
-      author: 'Author D',
-      year: 2018,
-      library_name: 'District Library',
-      latitude: 6.97,
-      longitude: 80.06,
-    },
-    {
-      title: 'Book 5',
-      author: 'Author E',
-      year: 2022,
-      library_name: 'Village Library',
-      latitude: 7.08,
-      longitude: 80.12,
-    },
-    {
-      title: 'Book 6',
-      author: 'Author F',
-      year: 2021,
-      library_name: 'Remote Library',
-      latitude: 7.09,
-      longitude: 80.11,
-    },
-    {
-      title: 'Book 7',
-      author: 'Author G',
-      year: 2020,
-      library_name: 'Local Library',
-      latitude: 6.887,
-      longitude: 79.955,
-    },
-    {
-      title: 'Book 8',
-      author: 'Author H',
-      year: 2019,
-      library_name: 'Neighborhood Library',
-      latitude: 6.8835,
-      longitude: 79.9525,
-    },
-    {
-      title: 'Book 9',
-      author: 'Author I',
-      year: 2018,
-      library_name: 'Far Town Library',
-      latitude: 6.97,
-      longitude: 80.055,
-    },
-    {
-      title: 'Book 10',
-      author: 'Author J',
-      year: 2017,
-      library_name: 'Far Village Library',
-      latitude: 7.075,
-      longitude: 80.125,
-    },
-  ]);
+  await seedBooks(100);
 
   console.log('✅ Sample data inserted successfully');
 };
