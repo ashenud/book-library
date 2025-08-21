@@ -157,7 +157,7 @@ npm run dev
 
 # Frontend
 cd ../web
-npm start
+npm run dev
 ```
 
 ### 6. Access

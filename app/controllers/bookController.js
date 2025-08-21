@@ -1,4 +1,5 @@
 import axios from 'axios';
+import jwt from 'jsonwebtoken';
 import { Op } from 'sequelize';
 import Book from '../models/Book.js';
 import Library from '../models/Library.js';
@@ -69,7 +70,7 @@ export const getBooks = async (request, response) => {
         {
           model: UserBook,
           as: 'user_books',
-          where: userId ? { userId } : undefined,
+          where: userId ? { user_id: userId } : undefined,
           required: false,
           attributes: ['status'],
         },

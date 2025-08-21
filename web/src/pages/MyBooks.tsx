@@ -83,7 +83,12 @@ const MyBooks = () => {
                 <td>{userBook.book?.author}</td>
                 <td>{userBook.book?.title}</td>
                 <td>{userBook.book?.library?.name}</td>
-                <td>{userBook.status}</td>
+                <td>
+                  {userBook.status === 'read' && <span className='badge bg-success'>Read</span>}
+                  {userBook.status === 'purchased' && <span className='badge bg-primary'>Purchased</span>}
+                  {userBook.status === 'wishlist' && <span className='badge bg-warning text-dark'>Wishlist</span>}
+                  {userBook.status === 'reviewed' && <span className='badge bg-info text-dark'>Reviewed</span>}
+                </td>
               </tr>
             ))
           )}

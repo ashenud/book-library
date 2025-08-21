@@ -48,11 +48,21 @@ const Home = () => {
     try {
       setLoading(true);
 
-      const res = await api.get(
-        `/books?title=${title}&author=${author}&year=${year}&userLat=${lat || 0}&userLng=${
-          lng || 0
-        }&maxDistance=${distance}`
-      );
+      // Build query string
+      const query = `/books?title=${title}&author=${author}&year=${year}&userLat=${lat || 0}&userLng=${
+        lng || 0
+      }&maxDistance=${distance}`;
+
+      // Attach headers if logged in
+      const headers: Record<string, string> = {};
+      if (isLoggedIn) {
+        const token = localStorage.getItem('token'); // or your storage method
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+      }
+
+      const res = await api.get(query, { headers });
 
       setBooks(res.data);
       setCurrentPage(1);
